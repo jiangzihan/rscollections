@@ -16,3 +16,13 @@ base Tokio
     1. 乐观锁
 4. retry
 5. backoff
+
+
+## install
+
+Cargo.toml add.
+
+```toml
+[dependencies]
+collections_rs = { git = "https://github.com/jiangzihan/rscollections.git" }
+```
