@@ -1,0 +1,31 @@
+[package]
+name = "rscollections"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["cache"]
+
+cache = ["etcd-lock", "rds-lock"]
+etcd-lock = ["etcd-client", "bb8"]
+rds-lock = ["redis", "bb8"]
+
+database = ["sqlx", "bb8"]
+oetl = ["tracing", "tracing-subscriber"]
+retry = ["backoff"]
+
+[dependencies]
+tokio = { version = "1", features = ["macros"]}
+async-trait = "0.1"
+
+redis = { version = "0.25", features = ["tokio-comp","connection-manager","keep-alive"], optional = true }
+etcd-client = { version = "0.13", optional = true }
+bb8 = { version = "0.8", optional = true }
+
+sqlx = { version = "0.7", features = [ "runtime-tokio", "tls-rustls", "postgres", "macros", "chrono", "migrate", "json" ], optional = true }
+
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
+
+cached = { version = "0.51", features = ["default", "async_tokio_rt_multi_thread"],optional = true }
+backoff = { version = "0.4", features = ["tokio"], optional = true }
