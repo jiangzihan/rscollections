@@ -1,2 +1,5 @@
 #[cfg(feature = "etcd-lock")]
-mod etcd_pools;
+mod etcd;
+
+#[cfg(feature = "redis-lock")]
+mod rdb;

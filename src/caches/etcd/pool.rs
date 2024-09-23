@@ -3,7 +3,6 @@ use bb8::ManageConnection;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-
 /// ## 使用方式
 /// 
 /// ```rust
@@ -29,8 +28,9 @@ pub struct EtcdConnectionManager {
 }
 
 impl EtcdConnectionManager {
-    pub fn new(endpoints:Vec<String>, options:Option<ConnectOptions>) -> Self {
-        Self { endpoints, options }
+    pub fn new(endpoints:String, options:Option<ConnectOptions>) -> Self {
+        let endpoint = endpoints.split(",").map(|x|x.to_string()).collect::<Vec<_>>();
+        Self { endpoints:endpoint, options }
     }
 }
 
@@ -58,40 +58,55 @@ impl ManageConnection for EtcdConnectionManager {
     }
 }
 
+
 #[cfg(test)]
 mod tests {
-    use std::{error::Error, time::Duration};
+    use std::{env, error::Error, time::Duration};
     use bb8::Pool;
 
     use super::*;
 
     #[tokio::test]
     async fn test_1() -> Result<(), Box<dyn Error>> {
+        dotenvy::dotenv().unwrap();
+
         let option = ConnectOptions::default()
             .with_keep_alive_while_idle(true)
             .with_keep_alive(Duration::from_secs(60), Duration::from_secs(180));
 
+        let url = env::var("ETCD_URLS").unwrap();
         let manager = EtcdConnectionManager::new(
-            vec!["http://127.0.0.1:2379".to_string()],
+            url,
             Some(option)
         );
     
         // 创建一个连接池，最大连接数为 10
         let pool = Pool::builder()
-            .max_size(10)
+            .max_size(1)
+            .connection_timeout(Duration::from_secs(1))
             .build(manager)
-            .await?;
+            .await.unwrap();
     
         // 并发任务使用连接池
-        let handles: Vec<_> = (0..10).map(|i| {
+        let handles: Vec<_> = (0..5).map(|i| {
             let pool = pool.clone();
             tokio::spawn(async move {
                 let conn = pool.get().await.unwrap();
-                let status = conn.lock().await.status().await;
-                match status {
-                    Ok(resp) => println!("Task1 {}: {:?}", i, resp),
-                    Err(e) => eprintln!("Task {}: Error: {:?}", i, e),
+
+                {
+                    let res = conn.lock().await.put("key", format!("{}", i), None).await.unwrap();
+                    let a = res.header().unwrap().revision();
+                    println!("res: {}", a);
                 }
+                {
+                    let t = conn.lock().await.get("key", None).await.unwrap();
+                    for x in t.kvs() {
+                        let k = x.key_str().unwrap();
+                        let v = x.value_str().unwrap();
+                        println!("i: {} k: {}, v: {}", i, k,v);
+                    }
+                }
+
             })
         }).collect();
     

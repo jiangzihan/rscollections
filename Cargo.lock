@@ -1806,6 +1806,7 @@ dependencies = [
  "backoff",
  "bb8",
  "cached",
+ "dotenvy",
  "etcd-client",
  "opentelemetry 0.24.0",
  "opentelemetry-otlp",
