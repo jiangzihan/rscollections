@@ -1373,23 +1373,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "opentelemetry-stdout"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d408d4345b8be6129a77c46c3bfc75f0d3476f3091909c7dd99c1f3d78582287"
-dependencies = [
- "async-trait",
- "chrono",
- "futures-util",
- "opentelemetry 0.24.0",
- "opentelemetry_sdk 0.24.1",
- "ordered-float",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
 name = "opentelemetry_sdk"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1810,7 +1793,6 @@ dependencies = [
  "etcd-client",
  "opentelemetry 0.24.0",
  "opentelemetry-otlp",
- "opentelemetry-stdout",
  "opentelemetry_sdk 0.24.1",
  "redis",
  "sqlx",
